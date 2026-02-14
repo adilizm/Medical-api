@@ -22,7 +22,7 @@ function Availability() {
     const [error, setError] = useState(null);
     const [showSlots, setShowSlots] = useState(false);
 
-    const fullSlots = Array.from({ length: 17 }, (_, i) => {
+    const fullSlots = Array.from({ length: 16 }, (_, i) => {
         const minutes = 540 + i * 30; // 9:00 AM start
         const hour = Math.floor(minutes / 60);
         const mins = minutes % 60;

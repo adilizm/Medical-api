@@ -1,31 +1,35 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 function Reservation() {
-  const [specialty, setSpecialty] = useState('')
+  const [doctorId, setDoctorId] = useState('')
   const [date, setDate] = useState('')
-  const [time, setTime] = useState('')
+  const [patientName, setPatientName] = useState('')
+  const [appointmentTime, setAppointmentTime] = useState('')
   const [availabilityMessage, setAvailabilityMessage] = useState('')
   const [loading, setLoading] = useState(false)
+  const [doctors, setDoctors] = useState([])
 
-  const specialties = [
-    'Cardiology',
-    'Dermatology',
-    'Neurology',
-    'Pediatrics',
-    'Orthopedics',
-    'Psychiatry',
-    'Radiology'
-  ]
+  useEffect(() => {
+    fetch('http://localhost:8000/api/doctors/')
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to fetch doctors')
+        return res.json()
+      })
+      .then(data => setDoctors(data.data || []))
+      .catch(err => console.error('Error loading doctors:', err))
+  }, [])
 
-  const hours = Array.from({ length: 17 }, (_, i) => {
+  // doctors are loaded from API into `doctors` state
+
+  const hours = Array.from({ length: 16 }, (_, i) => {
     const minutes = 540 + i * 30  // 540 = 9 * 60 (9:00 AM)
     const hour = Math.floor(minutes / 60)
     const mins = minutes % 60
     return `${hour.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`
   })
 
-  const handleCheckAvailability = async () => {
-    if (!specialty || !date || !time) {
+  const handleBooking = async () => {
+    if (!doctorId || !date || !appointmentTime || !patientName) {
       setAvailabilityMessage('Please fill in all fields')
       return
     }
@@ -33,15 +37,16 @@ function Reservation() {
     setLoading(true)
     try {
       // You can adjust the API endpoint and parameters as needed
-      const response = await fetch('http://localhost:8000/api/appointments/availability', {
+      const response = await fetch('http://localhost:8000/api/appointments', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          specialty,
-          date,
-          time
+          doctor_id: doctorId,
+          patient_name: doctorId,
+          appointment_time:appointmentTime,
+          appointment_date:date
         })
       })
 
@@ -64,10 +69,27 @@ function Reservation() {
       <h1 style={{ textAlign: 'center', color: '#333', marginBottom: '30px' }}>Book an Appointment</h1>
       
       <div style={{ marginBottom: '20px' }}>
-        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#555' }}>Specialty:</label>
+        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#555' }}>patient Name:</label>
+        <input
+          type="text"
+          value={patientName}
+          onChange={(e) => setPatientName(e.target.value)}
+          style={{
+            width: '100%',
+            padding: '10px',
+            border: '1px solid #ddd',
+            borderRadius: '4px',
+            fontSize: '16px',
+            boxSizing: 'border-box'
+          }}
+        />
+      </div>
+      
+      <div style={{ marginBottom: '20px' }}>
+        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#555' }}>Doctor:</label>
         <select 
-          value={specialty} 
-          onChange={(e) => setSpecialty(e.target.value)}
+          value={doctorId} 
+          onChange={(e) => setDoctorId(e.target.value)}
           style={{
             width: '100%',
             padding: '10px',
@@ -77,15 +99,14 @@ function Reservation() {
             boxSizing: 'border-box'
           }}
         >
-          <option value="">-- Select a Specialty --</option>
-          {specialties.map((spec) => (
-            <option key={spec} value={spec}>
-              {spec}
+          <option value="">-- Select a Doctor --</option>
+          {doctors.map((d) => (
+            <option key={d.id} value={d.id}>
+              {d.name} {d.specialty ? `(${d.specialty})` : ''}
             </option>
           ))}
         </select>
       </div>
-
       <div style={{ marginBottom: '20px' }}>
         <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#555' }}>Date:</label>
         <input
@@ -112,8 +133,8 @@ function Reservation() {
                 type="radio"
                 name="time"
                 value={hour}
-                checked={time === hour}
-                onChange={(e) => setTime(e.target.value)}
+                checked={appointmentTime === hour}
+                onChange={(e) => setAppointmentTime(e.target.value)}
                 style={{ marginRight: '8px', cursor: 'pointer' }}
               />
               <span style={{ color: '#555' }}>{hour}</span>
@@ -122,8 +143,20 @@ function Reservation() {
         </div>
       </div>
 
+{availabilityMessage && (
+        <div style={{
+          margin: '20px',
+          padding: '15px',
+          backgroundColor: availabilityMessage.includes('Error') ? '#f8d7da' : '#d4edda',
+          border: `1px solid ${availabilityMessage.includes('Error') ? '#f5c6cb' : '#c3e6cb'}`,
+          borderRadius: '4px',
+          color: availabilityMessage.includes('Error') ? '#721c24' : '#155724'
+        }}>
+          <p style={{ margin: 0 }}>{availabilityMessage}</p>
+        </div>
+      )}
       <button 
-        onClick={handleCheckAvailability} 
+        onClick={handleBooking} 
         disabled={loading}
         style={{
           width: '100%',
@@ -135,24 +168,13 @@ function Reservation() {
           fontSize: '16px',
           fontWeight: 'bold',
           cursor: loading ? 'not-allowed' : 'pointer',
-          transition: 'background-color 0.3s'
+          
         }}
       >
-        {loading ? 'Checking...' : 'Check Availability'}
+        {loading ? 'Checking...' : 'Check Availability & book appointment'}
       </button>
 
-      {availabilityMessage && (
-        <div style={{
-          marginTop: '20px',
-          padding: '15px',
-          backgroundColor: availabilityMessage.includes('Error') ? '#f8d7da' : '#d4edda',
-          border: `1px solid ${availabilityMessage.includes('Error') ? '#f5c6cb' : '#c3e6cb'}`,
-          borderRadius: '4px',
-          color: availabilityMessage.includes('Error') ? '#721c24' : '#155724'
-        }}>
-          <p style={{ margin: 0 }}>{availabilityMessage}</p>
-        </div>
-      )}
+      
     </div>
   )
 }
