@@ -2,8 +2,10 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Doctor;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use PhpParser\Comment\Doc;
 
 class DoctorResource extends JsonResource
 {
@@ -15,9 +17,9 @@ class DoctorResource extends JsonResource
     public function toArray(Request $request): array
     {
        return [
-            'id' => $this->id,
-            'name' => $this->name,
-            'specialty' => $this->specialty,
+            'id' => $this[Doctor::ID],
+            'name' => $this[Doctor::NAME],
+            'specialty' => $this[Doctor::SPECIALIZATION],
            
         ];
     }

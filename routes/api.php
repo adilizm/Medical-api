@@ -9,5 +9,5 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 
-Route::post('doctors',[DoctorController::class,'list_doctors']);
+Route::get('doctors',[DoctorController::class,'list_doctors']);
 
