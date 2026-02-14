@@ -17,8 +17,6 @@
 	"appointment_time": "2026-02-18 09:00:00"
 }
 ```
-- Optionally, add `duration_minutes` (default: 30)
-
 ---
 ## Medical Appointment API - Setup Guide
 
