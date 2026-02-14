@@ -19,4 +19,9 @@ class Doctor extends Model
         'name',        
         'specialization',
     ];
+
+    public function appointments()
+    {
+        return $this->hasMany(Appointment::class);
+    }
 }

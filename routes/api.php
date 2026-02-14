@@ -9,5 +9,6 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 
-Route::get('doctors',[DoctorController::class,'list_doctors']);
+Route::get('doctors/{doctorId}/availability',[DoctorController::class,'CheckDoctorAvailability']);
+Route::get('doctors',[DoctorController::class,'ListDoctors']);
 

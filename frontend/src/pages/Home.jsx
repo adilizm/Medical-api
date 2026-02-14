@@ -6,7 +6,7 @@ function Home() {
   return (
     <ul>
       <li> <Link to="/doctors" >List doctors</Link> </li>
-      <li>reserve an apointment</li>
+      <li> <Link to="booking" >reserve an apointment</Link></li>
     </ul>
   )
 }
